@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+ redis:
+  image: redis
+  container_name: cache
+  expose:
+    - 6379
+ server:
+  build: ./server/
+  volumes:
+    - ./:/var/www/app
+     - /usr/app/node_modules
+  links:
+    - redis
+  ports:
+    - "8081:8081"
+  environment:
+    - REDIS_URL=redis://cache
+    - NODE_ENV=development
+    - PORT=8081
+  command:
+    sh -c 'npm i && node server.js'
+ client:
+    build:
+      context: ./client/
+    command: npm start
+    volumes:
+      - ./client/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+
+
+
